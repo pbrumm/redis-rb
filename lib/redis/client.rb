@@ -121,6 +121,8 @@ class Redis
       "zset_range"           => "zrange",
       "zset_delete"          => "zrem",
       "zset_score"           => "zscore",
+      "zset_union"           => "zunion",
+      "zset_intersect"       => "zinter",
       "zset_incr_by"         => "zincrby",
       "zset_increment_by"    => "zincrby"
     }
@@ -204,7 +206,36 @@ class Redis
         call_command(args.unshift(:msetnx))
       end
     end
-
+    def zunion(*args)
+      if args[1].kind_of?(Array)
+        args.insert(1,args[1].size)
+        call_command(args.flatten.unshift(:zunion))
+      elsif args[1].kind_of?(Hash)
+        hash = args.delete_at(1)
+        args.insert(1,hash.size)
+        args.insert(2,hash.keys)
+        args.insert(3,"WEIGHTS")
+        args.insert(4,hash.values)
+        call_command(args.flatten.unshift(:zunion))
+      else
+        call_command(args.unshift(:zunion))
+      end
+    end
+    def zinter(*args)
+      if args[1].kind_of?(Array)
+        args.insert(1,args[1].size)
+        call_command(args.flatten.unshift(:zinter))
+      elsif args[1].kind_of?(Hash)
+        hash = args.delete_at(1)
+        args.insert(1,hash.size)
+        args.insert(2,hash.keys)
+        args.insert(3,"WEIGHTS")
+        args.insert(4,hash.values)
+        call_command(args.flatten.unshift(:zinter))
+      else
+        call_command(args.unshift(:zinter))
+      end
+    end
     def mapped_msetnx(hash)
       msetnx(*hash.to_a.flatten)
     end

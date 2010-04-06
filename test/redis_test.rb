@@ -676,9 +676,35 @@ class RedisTest < Test::Unit::TestCase
 
     test "ZREMRANGEBYSCORE"
 
-    test "ZUNION"
+    test "ZUNION" do
+      @r.zadd "foo", 1, "s1"
+      @r.zadd "foo", 2, "s2"
+      @r.zadd "foo", 3, "s3"
 
-    test "ZINTER"
+      @r.zadd "foo2", 1, "s1"
+      @r.zadd "foo2", 2, "s2"
+      @r.zadd "foo2", 3, "s4"
+
+      assert_equal 4, @r.zunion("foo3", 2, "foo", "foo2")
+      assert_equal 4, @r.zunion("foo3", ["foo", "foo2"])
+      assert_equal 4, @r.zunion("foo3", {"foo" => 1, "foo2" => 2})
+    end
+    
+    test "ZINTER" do
+      @r.zadd "foo", 1, "s1"
+      @r.zadd "foo", 2, "s2"
+      @r.zadd "foo", 3, "s3"
+
+      @r.zadd "foo2", 1, "s1"
+      @r.zadd "foo2", 2, "s2"
+      @r.zadd "foo2", 3, "s4"
+
+      assert_equal 2, @r.zinter("foo3", 2, "foo", "foo2")
+      assert_equal 2, @r.zinter("foo3", ["foo", "foo2"])
+      assert_equal 4, @r.zunion("foo3", {"foo" => 1, "foo2" => 2})
+      
+      
+    end
   end
 
   context "Commands operating on hashes" do
